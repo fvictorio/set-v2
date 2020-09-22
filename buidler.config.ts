@@ -1,21 +1,23 @@
 require("dotenv").config();
 
 import { BuidlerConfig, usePlugin, internalTask } from "@nomiclabs/buidler/config";
-import { TASK_COMPILE_RUN_COMPILER } from "@nomiclabs/buidler/builtin-tasks/task-names";
+import { TASK_COMPILE_SOLIDITY_COMPILE } from "@nomiclabs/buidler/builtin-tasks/task-names";
 import { execSync } from "child_process";
 import { privateKeys } from "./utils/wallets";
 
 usePlugin("@nomiclabs/buidler-waffle");
 usePlugin("buidler-typechain");
 usePlugin("solidity-coverage");
-usePlugin("buidler-deploy");
+usePlugin("@fvictorio/buidler-deploy");
 
-internalTask(TASK_COMPILE_RUN_COMPILER).setAction(setupNativeSolc);
+internalTask(TASK_COMPILE_SOLIDITY_COMPILE).setAction(setupNativeSolc);
 
 const config: BuidlerConfig = {
-  solc: {
+  solidity: {
     version: "0.6.10",
-    optimizer: { enabled: true, runs: 200 },
+    settings: {
+      optimizer: { enabled: true, runs: 200 },
+    },
   },
   namedAccounts: {
     deployer: 0,
@@ -65,7 +67,7 @@ async function setupNativeSolc({ input }, { config }, runSuper) {
 
   console.log("Output", solcVersionOutput);
 
-  if (!solcVersionOutput.includes(config.solc.version)) {
+  if (!solcVersionOutput.includes(config.solidity.compilers[0].version)) {
     console.log(`Using solcjs`);
     return runSuper();
   }
